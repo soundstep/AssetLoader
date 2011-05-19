@@ -1,12 +1,9 @@
 package com.soma.assets.loader.base {
 
-	import org.flexunit.asserts.assertFalse;
-	import org.flexunit.asserts.fail;
-	import org.flexunit.async.Async;
-	import com.soma.assets.loader.events.AssetLoaderProgressEvent;
-	import com.soma.assets.loader.events.AssetLoaderEvent;
 	import com.soma.assets.loader.core.ILoadStats;
 	import com.soma.assets.loader.core.ILoader;
+	import com.soma.assets.loader.events.AssetLoaderEvent;
+	import com.soma.assets.loader.events.AssetLoaderProgressEvent;
 	import com.soma.assets.loader.loaders.ImageLoader;
 	import com.soma.assets.loader.loaders.TextLoader;
 
@@ -14,9 +11,9 @@ package com.soma.assets.loader.base {
 	import org.flexunit.asserts.assertNotNull;
 	import org.flexunit.asserts.assertNull;
 	import org.flexunit.asserts.assertTrue;
+	import org.flexunit.asserts.fail;
+	import org.flexunit.async.Async;
 	import org.osflash.signals.utils.SignalAsyncEvent;
-	import org.osflash.signals.utils.failOnSignal;
-	import org.osflash.signals.utils.handleSignal;
 
 	import flash.net.URLRequest;
 

@@ -31,12 +31,6 @@ package com.soma.assets.loader.loaders {
 		}
 
 		// NON - STANDARD - LOADER - TESTS -------------------------------------------------------------------------------------------//
-		[Test]
-		override public function signalsReadyOnConstruction() : void
-		{
-			super.signalsReadyOnConstruction();
-			assertNotNull(_loaderName + "#onId3 should NOT be null after construction", SoundLoader(_loader).onId3);
-		}
 
 		[Test (async)]
 		public function onId3Signal() : void

@@ -53,6 +53,7 @@ package com.soma.assets.loader.base {
 
 		protected function open(event : TimerEvent, data : Object) : void
 		{
+			data;
 			_stats.open();
 			assertTrue("LoaderStats#latency should be more than 250", (_stats.latency > 250));
 		}
@@ -86,6 +87,7 @@ package com.soma.assets.loader.base {
 
 		protected function done(event : TimerEvent, data : Object) : void
 		{
+			data;
 			_stats.done();
 			assertEquals("LoaderStats#bytesLoaded should be equal to 1000", _stats.bytesLoaded, 1000);
 			assertEquals("LoaderStats#bytesTotal should be equal to 1000", _stats.bytesTotal, 1000);

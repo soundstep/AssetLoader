@@ -11,5 +11,5 @@ package com.soma.assets.loader.base
 				public var loaderStatsTest : LoaderStatsTest;
 		
 		public var statsMonitorTest : StatsMonitorTest;
-		//		public var paramTest : ParamTest;	}
+				public var paramTest : ParamTest;	}
 }
