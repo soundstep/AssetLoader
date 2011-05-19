@@ -58,7 +58,7 @@
 			<!-- Build our SWC with a versioned name. -->
 			<arg value="-output=${bin.loc}/${project.name.versioned}.swc" />
 			<!-- We want all the org package classes in the SWC being built. -->
-			<arg value="-include-sources=${main.src.loc}/org" />
+			<arg value="-include-sources=${main.src.loc}/com" />
 			<!-- Include classes from SWCs in this folder, but only the ones we use. -->
 			<arg value="-library-path+=${lib.loc}" />
 			<!-- Boolean mosh pit! -->
@@ -88,6 +88,7 @@
 			<arg value="-incremental=true" />
 			<arg value="-verbose-stacktraces=true" />
 			<arg value="-headless-server=true" />
+			<arg value="-debug=true" />
 		</java>
 		<!-- Execute FlexTestSuite.swf as FlexUnit tests and publish reports -->
 		<echo>[test] Running SWF ${build.loc}/testing/FlexTestSuite.swf</echo>
@@ -118,11 +119,11 @@
 			<arg line="-window-title 'AssetLoader ${assetloader.ver.num}'" />
 			<arg line="-main-title 'AssetLoader ${assetloader.ver.num}'" />
 			<arg line="-footer 'AssetLoader - http://github.com/Matan/AssetLoader - Documentation generated at: ${docgen.time}'" />
-			<arg line="-package org.assetloader.base 'Base classes'" />
-			<arg line="-package org.assetloader.core 'The core AssetLoader apparatus contracts'" />
-			<arg line="-package org.assetloader.loaders 'The ILoader implementations'" />
-			<arg line="-package org.assetloader.parsers 'The IConfigParser implementations'" />
-			<arg line="-package org.assetloader.signals 'The custom AS3Signals dispatched from all ILoaders'" />
+			<arg line="-package com.soma.assets.loader.base 'Base classes'" />
+			<arg line="-package com.soma.assets.loader.core 'The core AssetLoader apparatus contracts'" />
+			<arg line="-package com.soma.assets.loader.loaders 'The ILoader implementations'" />
+			<arg line="-package com.soma.assets.loader.parsers 'The IConfigParser implementations'" />
+			<arg line="-package com.soma.assets.loader.events 'The Events'" />
 		</java>
 		<echo>[asdoc] ASDOC documentation generated successfully</echo>
 	</target>
@@ -143,8 +144,8 @@
 		<copy file="${bin.loc}/${project.name.versioned}.swc" todir="${dist.loc}/bin" />
 		<copy file="${lib.loc}/${as3.signals.name.versioned}.swc" todir="${dist.loc}/libs" />
 		<copy file="${lib.loc}/${as3.corelib.json.name}.swc" todir="${dist.loc}/libs" />
-		<copy todir="${dist.loc}/src/org">
-			<fileset dir="${main.src.loc}/org" />
+		<copy todir="${dist.loc}/src/com">
+			<fileset dir="${main.src.loc}/com" />
 		</copy>
 		<copy todir="${dist.loc}/src_examples/org">
 			<fileset dir="${exam.src.loc}/org" />
@@ -160,7 +161,7 @@
 		<zip destfile="${dist.loc}/bin/${project.name.versioned}.swc" update="true">
 			<zipfileset dir="${doc.loc}/tempdita" prefix="docs">
 				<include name="*packages.dita*" />
-				<include name="*org.*" />
+				<include name="*com.*" />
 			</zipfileset>
 		</zip>
 		<!-- Copy LICENSE  -->
