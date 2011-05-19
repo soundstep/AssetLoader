@@ -103,6 +103,7 @@ package org.assetloader.loaders
 		 */
 		protected function error_handler(event : ErrorEvent) : void
 		{
+			_inProgress = false;
 			if(_retryTally < getParam(Param.RETRIES) - 1)
 			{
 				_retryTally++;
