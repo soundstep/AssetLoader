@@ -1,26 +1,26 @@
-package org.assetloader.example
-{
-	import flash.display.BlendMode;
-	import flash.text.TextFieldAutoSize;
-	import org.assetloader.AssetLoader;
-	import org.assetloader.base.Param;
-	import org.assetloader.base.StatsMonitor;
-	import org.assetloader.core.IAssetLoader;
-	import org.assetloader.core.ILoadStats;
-	import org.assetloader.core.ILoader;
-	import org.assetloader.core.IParam;
-	import org.assetloader.loaders.SWFLoader;
-	import org.assetloader.loaders.VideoLoader;
-	import org.assetloader.signals.ErrorSignal;
-	import org.assetloader.signals.LoaderSignal;
-	import org.assetloader.signals.ProgressSignal;
+package org.assetloader.example {
 
+	import com.soma.assets.loader.events.AssetLoaderErrorEvent;
+	import com.soma.assets.loader.events.AssetLoaderEvent;
+	import com.soma.assets.loader.events.AssetLoaderProgressEvent;
+	import com.soma.assets.loader.AssetLoader;
+	import com.soma.assets.loader.base.Param;
+	import com.soma.assets.loader.base.StatsMonitor;
+	import com.soma.assets.loader.core.IAssetLoader;
+	import com.soma.assets.loader.core.ILoadStats;
+	import com.soma.assets.loader.core.ILoader;
+	import com.soma.assets.loader.core.IParam;
+	import com.soma.assets.loader.loaders.SWFLoader;
+	import com.soma.assets.loader.loaders.VideoLoader;
+
+	import flash.display.BlendMode;
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
 	import flash.events.Event;
 	import flash.net.URLRequest;
 	import flash.text.TextField;
+	import flash.text.TextFieldAutoSize;
 	import flash.text.TextFormat;
 
 	/**
@@ -84,8 +84,8 @@ package org.assetloader.example
 			_monitor.add(movie);
 
 			// Add listeners to monitor like you would add listeners to a loader.
-			_monitor.onProgress.add(monitor_onProgress_handler);
-			_monitor.onComplete.add(monitor_onComplete_handler);
+			_monitor.addEventListener(AssetLoaderProgressEvent.PROGRESS, monitor_onProgress_handler);
+			_monitor.addEventListener(AssetLoaderEvent.COMPLETE, monitor_onComplete_handler);
 
 			// Start the groups
 			group.start();
@@ -96,37 +96,37 @@ package org.assetloader.example
 		// --------------------------------------------------------------------------------------------------------------------------------//
 		// CHILD HANDLERS
 		// --------------------------------------------------------------------------------------------------------------------------------//
-		protected function onChildOpen_handler(signal : LoaderSignal, child : ILoader) : void
+		protected function onChildOpen_handler(event : AssetLoaderEvent) : void
 		{
-			append("[" + signal.loader.id + "]\t[" + child.id + "]\t\topened  \tLatency\t: " + Math.floor(child.stats.latency) + "\tms");
+			append("[" + event.child.id + "]\t[" + event.child.id + "]\t\topened  \tLatency\t: " + Math.floor(event.child.stats.latency) + "\tms");
 		}
 
-		protected function onChildError_handler(signal : ErrorSignal, child : ILoader) : void
+		protected function onChildError_handler(event : AssetLoaderErrorEvent) : void
 		{
-			append("[" + signal.loader.id + "]\t[" + child.id + "]\t\terror  \tType\t: " + signal.type + " | Message: " + signal.message);
+			append("[" + event.child.id + "]\t[" + event.child.id + "]\t\terror  \tType\t: " + event.errorType + " | Message: " + event.message);
 		}
 
-		protected function onChildComplete_handler(signal : LoaderSignal, child : ILoader) : void
+		protected function onChildComplete_handler(event : AssetLoaderEvent) : void
 		{
-			append("[" + signal.loader.id + "]\t[" + child.id + "]\t\tcomplete\tSpeed\t: " + Math.floor(child.stats.averageSpeed) + "\tkbps");
+			append("[" + event.child.id + "]\t[" + event.child.id + "]\t\tcomplete\tSpeed\t: " + Math.floor(event.child.stats.averageSpeed) + "\tkbps");
 		}
 
 		// --------------------------------------------------------------------------------------------------------------------------------//
 		// STANDARD HANDLERS
 		// --------------------------------------------------------------------------------------------------------------------------------//
-		protected function onOpen_handler(signal : LoaderSignal) : void
+		protected function onOpen_handler(event : AssetLoaderEvent) : void
 		{
-			append("[" + signal.loader.id + "]\t\t         \topened  \tLatency\t: " + Math.floor(signal.loader.stats.latency) + "\tms");
+			append("[" + event.currentTarget.id + "]\t\t         \topened  \tLatency\t: " + Math.floor(event.currentTarget.stats.latency) + "\tms");
 		}
 
-		protected function onError_handler(signal : ErrorSignal) : void
+		protected function onError_handler(event : AssetLoaderErrorEvent) : void
 		{
-			append("[" + signal.loader.id + "]\t\t         \terror  \tType\t: " + signal.type + " | Message: " + signal.message);
+			append("[" + event.currentTarget.id + "]\t\t         \terror  \tType\t: " + event.errorType + " | Message: " + event.message);
 		}
 
-		protected function onComplete_handler(signal : LoaderSignal, payload : *) : void
+		protected function onComplete_handler(event : AssetLoaderEvent) : void
 		{
-			var loader : ILoader = signal.loader;
+			var loader : ILoader = event.currentTarget as ILoader;
 
 			// Do your clean up!
 			removeListenersFromLoader(loader);
@@ -137,16 +137,15 @@ package org.assetloader.example
 		// --------------------------------------------------------------------------------------------------------------------------------//
 		// MONITOR HANDLERS
 		// --------------------------------------------------------------------------------------------------------------------------------//
-		protected function monitor_onProgress_handler(signal : ProgressSignal) : void
+		protected function monitor_onProgress_handler(event:AssetLoaderProgressEvent) : void
 		{
-			_progressBar.width = (signal.progress * stage.stageWidth) / 100;
-			
-			_progressField.text = Math.ceil(signal.progress) + "% | " + Math.ceil(signal.bytesLoaded / 1024 /1024) + " mb of " + Math.ceil(signal.bytesTotal / 1024 /1024) + " mb";
+			_progressBar.width = (event.progress * stage.stageWidth) / 100;
+			_progressField.text = Math.ceil(event.progress) + "% | " + Math.ceil(event.bytesLoaded / 1024 /1024) + " mb of " + Math.ceil(event.bytesTotal / 1024 /1024) + " mb";
 		}
 
-		protected function monitor_onComplete_handler(signal : LoaderSignal, stats : ILoadStats) : void
+		protected function monitor_onComplete_handler(event:AssetLoaderEvent) : void
 		{
-			dumpStats("MONITOR", stats);
+			dumpStats("MONITOR", event.stats);
 		}
 
 		// --------------------------------------------------------------------------------------------------------------------------------//
@@ -157,14 +156,14 @@ package org.assetloader.example
 			if(loader is IAssetLoader)
 			{
 				var group : IAssetLoader = IAssetLoader(loader);
-				group.onChildOpen.add(onChildOpen_handler);
-				group.onChildError.add(onChildError_handler);
-				group.onChildComplete.add(onChildComplete_handler);
+				group.addEventListener(AssetLoaderEvent.CHILD_OPEN, onChildOpen_handler);
+				group.addEventListener(AssetLoaderErrorEvent.CHILD_ERROR, onChildError_handler);
+				group.addEventListener(AssetLoaderEvent.CHILD_COMPLETE, onChildComplete_handler);
 			}
 
-			loader.onOpen.add(onOpen_handler);
-			loader.onComplete.add(onComplete_handler);
-			loader.onError.add(onError_handler);
+			loader.addEventListener(AssetLoaderEvent.OPEN, onOpen_handler);
+			loader.addEventListener(AssetLoaderErrorEvent.ERROR, onError_handler);
+			loader.addEventListener(AssetLoaderEvent.COMPLETE, onComplete_handler);
 		}
 
 		protected function removeListenersFromLoader(loader : ILoader) : void
@@ -172,14 +171,14 @@ package org.assetloader.example
 			if(loader is IAssetLoader)
 			{
 				var group : IAssetLoader = IAssetLoader(loader);
-				group.onChildOpen.remove(onChildOpen_handler);
-				group.onChildError.remove(onChildError_handler);
-				group.onChildComplete.remove(onChildComplete_handler);
+				group.removeEventListener(AssetLoaderEvent.CHILD_OPEN, onChildOpen_handler);
+				group.removeEventListener(AssetLoaderErrorEvent.CHILD_ERROR, onChildError_handler);
+				group.removeEventListener(AssetLoaderEvent.CHILD_COMPLETE, onChildComplete_handler);
 			}
 
-			loader.onOpen.remove(onOpen_handler);
-			loader.onComplete.remove(onComplete_handler);
-			loader.onError.remove(onError_handler);
+			loader.removeEventListener(AssetLoaderEvent.OPEN, onOpen_handler);
+			loader.removeEventListener(AssetLoaderErrorEvent.ERROR, onError_handler);
+			loader.removeEventListener(AssetLoaderEvent.COMPLETE, onComplete_handler);
 		}
 
 		// --------------------------------------------------------------------------------------------------------------------------------//

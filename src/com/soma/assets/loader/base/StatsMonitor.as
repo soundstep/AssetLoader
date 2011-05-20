@@ -113,7 +113,6 @@ package com.soma.assets.loader.base {
 		 */
 		protected function open_handler(event:AssetLoaderEvent):void {
 			_stats.open();
-			// _onOpen.dispatch(signal.loader);
 			dispatchEvent(new AssetLoaderEvent(AssetLoaderEvent.OPEN, null, null, null, null, null, ILoader(event.currentTarget)));
 		}
 
@@ -128,7 +127,6 @@ package com.soma.assets.loader.base {
 				bytesTotal += loader.stats.bytesTotal;
 			}
 			_stats.update(bytesLoaded, bytesTotal);
-
 			var progressEvent:AssetLoaderProgressEvent = new AssetLoaderProgressEvent(AssetLoaderProgressEvent.PROGRESS, ILoader(event.currentTarget));
 			progressEvent.latency = _stats.latency;
 			progressEvent.speed = _stats.speed;

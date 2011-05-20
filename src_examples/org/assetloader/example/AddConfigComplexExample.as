@@ -1,11 +1,10 @@
-package org.assetloader.example
-{
-	import org.assetloader.AssetLoader;
-	import org.assetloader.core.IAssetLoader;
-	import org.assetloader.core.ILoadStats;
-	import org.assetloader.core.ILoader;
-	import org.assetloader.signals.ErrorSignal;
-	import org.assetloader.signals.LoaderSignal;
+package org.assetloader.example {
+
+	import com.soma.assets.loader.AssetLoader;
+	import com.soma.assets.loader.core.IAssetLoader;
+	import com.soma.assets.loader.core.ILoadStats;
+	import com.soma.assets.loader.events.AssetLoaderErrorEvent;
+	import com.soma.assets.loader.events.AssetLoaderEvent;
 
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
@@ -13,7 +12,6 @@ package org.assetloader.example
 	import flash.events.Event;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
-	import flash.utils.Dictionary;
 
 	/**
 	 * @author Matan Uberstein
@@ -37,16 +35,16 @@ package org.assetloader.example
 			_assetloader.addConfig("complex-queue-config.xml");
 
 			// Because we are passing the config as a URL, we need wait until AssetLoader fires onConfigLoaded before stating the queue.
-			_assetloader.onConfigLoaded.add(onConfigLoaded_handler);
+			_assetloader.addEventListener(AssetLoaderEvent.CONFIG_LOADED, onConfigLoaded_handler);
 		}
 
 		// --------------------------------------------------------------------------------------------------------------------------------//
 		// HANDLERS
 		// --------------------------------------------------------------------------------------------------------------------------------//
-		protected function onConfigLoaded_handler(signal : LoaderSignal) : void
+		protected function onConfigLoaded_handler(event : AssetLoaderEvent) : void
 		{
 			// Do your clean up!
-			_assetloader.onConfigLoaded.remove(onConfigLoaded_handler);
+			_assetloader.removeEventListener(AssetLoaderEvent.CONFIG_LOADED, onConfigLoaded_handler);
 
 			// Before we start, lets add the listener to the child group loaders.
 			var group1 : IAssetLoader = IAssetLoader(_assetloader.getLoader('group-01'));
@@ -63,24 +61,24 @@ package org.assetloader.example
 			_assetloader.start();
 		}
 
-		protected function onChildOpen_handler(signal : LoaderSignal, child : ILoader) : void
+		protected function onChildOpen_handler(event : AssetLoaderEvent) : void
 		{
-			append("[" + signal.loader.id + "]\t[" + child.id + "]\t\topened  \tLatency\t: " + Math.floor(child.stats.latency) + "\tms");
+			append("[" + event.child.id + "]\t[" + event.child.id + "]\t\topened  \tLatency\t: " + Math.floor(event.child.stats.latency) + "\tms");
 		}
 
-		protected function onChildError_handler(signal : ErrorSignal, child : ILoader) : void
+		protected function onChildError_handler(event : AssetLoaderErrorEvent) : void
 		{
-			append("[" + signal.loader.id + "]\t[" + child.id + "]\t\terror  \tType\t: " + signal.type + " | Message: " + signal.message);
+			append("[" + event.child.id + "]\t[" + event.child.id + "]\t\terror  \tType\t: " + event.errorType + " | Message: " + event.message);
 		}
 
-		protected function onChildComplete_handler(signal : LoaderSignal, child : ILoader) : void
+		protected function onChildComplete_handler(event : AssetLoaderEvent) : void
 		{
-			append("[" + signal.loader.id + "]\t[" + child.id + "]\t\tcomplete\tSpeed\t: " + Math.floor(child.stats.averageSpeed) + "\tkbps");
+			append("[" + event.child.id + "]\t[" + event.child.id + "]\t\tcomplete\tSpeed\t: " + Math.floor(event.child.stats.averageSpeed) + "\tkbps");
 		}
 
-		protected function onComplete_handler(signal : LoaderSignal, assets : Dictionary) : void
+		protected function onComplete_handler(event : AssetLoaderEvent) : void
 		{
-			var loader : IAssetLoader = IAssetLoader(signal.loader);
+			var loader : IAssetLoader = IAssetLoader(event.currentTarget);
 
 			// Do your clean up!
 			removeListenersFromLoader(loader);
@@ -102,20 +100,18 @@ package org.assetloader.example
 		// --------------------------------------------------------------------------------------------------------------------------------//
 		protected function addListenersToLoader(loader : IAssetLoader) : void
 		{
-			loader.onChildOpen.add(onChildOpen_handler);
-			loader.onChildError.add(onChildError_handler);
-			loader.onChildComplete.add(onChildComplete_handler);
-
-			loader.onComplete.add(onComplete_handler);
+			loader.addEventListener(AssetLoaderEvent.CHILD_OPEN, onChildOpen_handler);
+			loader.addEventListener(AssetLoaderErrorEvent.CHILD_ERROR, onChildError_handler);
+			loader.addEventListener(AssetLoaderEvent.CHILD_COMPLETE, onChildComplete_handler);
+			loader.addEventListener(AssetLoaderEvent.COMPLETE, onComplete_handler);
 		}
 
 		protected function removeListenersFromLoader(loader : IAssetLoader) : void
 		{
-			loader.onChildOpen.remove(onChildOpen_handler);
-			loader.onChildError.remove(onChildError_handler);
-			loader.onChildComplete.remove(onChildComplete_handler);
-
-			loader.onComplete.remove(onComplete_handler);
+			loader.removeEventListener(AssetLoaderEvent.CHILD_OPEN, onChildOpen_handler);
+			loader.removeEventListener(AssetLoaderErrorEvent.CHILD_ERROR, onChildError_handler);
+			loader.removeEventListener(AssetLoaderEvent.CHILD_COMPLETE, onChildComplete_handler);
+			loader.removeEventListener(AssetLoaderEvent.COMPLETE, onComplete_handler);
 		}
 
 		// --------------------------------------------------------------------------------------------------------------------------------//
