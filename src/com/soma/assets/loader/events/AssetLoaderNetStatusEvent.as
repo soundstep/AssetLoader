@@ -7,16 +7,17 @@ package com.soma.assets.loader.events {
 	 */
 	public class AssetLoaderNetStatusEvent extends Event {
 
-		public static const STATUS:String = "AssetLoaderNetStatusEvent.NET_STATUS";
-		public var status:Object;
+		public static const INFO:String = "AssetLoaderNetStatusEvent.INFO";
+		
+		public var info:Object;
 
-		public function AssetLoaderNetStatusEvent(type:String, status:Object = null, bubbles:Boolean = false, cancelable:Boolean = false) {
-			this.status = status;
+		public function AssetLoaderNetStatusEvent(type:String, info:Object = null, bubbles:Boolean = false, cancelable:Boolean = false) {
+			this.info = info;
 			super(type, bubbles, cancelable);
 		}
 
 		override public function clone():Event {
-			return new AssetLoaderNetStatusEvent(type, status, bubbles, cancelable);
+			return new AssetLoaderNetStatusEvent(type, info, bubbles, cancelable);
 		}
 	}
 }

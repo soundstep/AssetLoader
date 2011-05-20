@@ -4,15 +4,16 @@ package com.soma.assets.loader {
 	import com.soma.assets.loader.base.Param;
 	import com.soma.assets.loader.core.IAssetLoader;
 	import com.soma.assets.loader.core.ILoader;
+	import com.soma.assets.loader.events.AssetLoaderErrorEvent;
+	import com.soma.assets.loader.events.AssetLoaderEvent;
+	import com.soma.assets.loader.events.AssetLoaderHTTPStatusEvent;
 	import com.soma.assets.loader.loaders.BaseLoaderTest;
 
 	import org.flexunit.asserts.assertEquals;
 	import org.flexunit.asserts.assertNotNull;
 	import org.flexunit.asserts.assertTrue;
 	import org.flexunit.asserts.fail;
-	import org.osflash.signals.utils.SignalAsyncEvent;
-	import org.osflash.signals.utils.failOnSignal;
-	import org.osflash.signals.utils.handleSignal;
+	import org.flexunit.async.Async;
 
 	import flash.utils.Dictionary;
 
@@ -56,28 +57,19 @@ package com.soma.assets.loader {
 			assertTrue("AssetLoader should implement IAssetLoader", _loader is IAssetLoader);
 		}
 
-		[Test]
-		override public function signalsReadyOnConstruction() : void
-		{
-			super.signalsReadyOnConstruction();
-			assertNotNull(_loaderName + "#onChildOpen be should NOT be null after construction", _assetloader.onChildOpen);
-			assertNotNull(_loaderName + "#onChildComplete be should NOT be null after construction", _assetloader.onChildComplete);
-			assertNotNull(_loaderName + "#onChildError be should NOT be null after construction", _assetloader.onChildError);
-			assertNotNull(_loaderName + "#onConfigLoaded be should NOT be null after construction", _assetloader.onConfigLoaded);
-		}
-		
 		[Test (async)]
 		override public function booleanStateAfterError() : void
 		{
 			// Change url to force error signal.
 			_assetloader.getLoader("id-01").request.url = _path + "DOES-NOT-EXIST.file";
 			
-			handleSignal(this, _loader.onError, onError_booleanStateAfterError_handler);
+			_loader.addEventListener(AssetLoaderErrorEvent.ERROR, Async.asyncHandler(this, onError_booleanStateAfterError_handler, 500));
 			_loader.start();
 		}
 		
-		override protected function onError_booleanStateAfterError_handler(event : SignalAsyncEvent, data : Object) : void
+		override protected function onError_booleanStateAfterError_handler(event : AssetLoaderErrorEvent, data : Object) : void
 		{
+			data;
 			assertEquals(_loaderName + "#invoked state after loading error", true, _loader.invoked);
 			// inProgress will be true for this IAssetLoader, because it will still continue loader the other assets.
 			assertEquals(_loaderName + "#inProgress state after loading error", true, _loader.inProgress);
@@ -88,118 +80,115 @@ package com.soma.assets.loader {
 		}
 
 		[Test (async)]
-		public function onChildCompleteSignal() : void
+		public function onChildCompleteEvent() : void
 		{
-			handleSignal(this, _assetloader.onChildComplete, onChildCompleteSignal_handler);
+			_assetloader.addEventListener(AssetLoaderEvent.CHILD_COMPLETE, Async.asyncHandler(this, onChildCompleteSignal_handler, 500));
 			_assetloader.start();
 		}
 
-		protected function onChildCompleteSignal_handler(event : SignalAsyncEvent, data : Object) : void
+		protected function onChildCompleteSignal_handler(event : AssetLoaderEvent, data : Object) : void
 		{
-			var values : Array = event.args;
-			assertTrue("Argument 1 should be LoaderSignal", (values[0] is LoaderSignal));
-			assertTrue("Argument 2 should be ILoader", (values[1] is ILoader));
-
-			var signal : LoaderSignal = values[0];
-
-			assertNotNull("LoaderSignal#loader should NOT be null", signal.loader);
+			data;
+			assertTrue("Argument 2 should be ILoader", (event.currentTarget is ILoader));
+			assertNotNull("#loader should NOT be null", event.currentTarget);
 		}
 
 		[Test (async)]
 		public function onChildOpenSignal() : void
 		{
-			handleSignal(this, _assetloader.onChildOpen, onChildOpen_handler);
+			_assetloader.addEventListener(AssetLoaderEvent.CHILD_OPEN, Async.asyncHandler(this, onChildOpen_handler, 500));
 			_loader.start();
 		}
 
-		protected function onChildOpen_handler(event : SignalAsyncEvent, data : Object) : void
+		protected function onChildOpen_handler(event : AssetLoaderEvent, data : Object) : void
 		{
-			var values : Array = event.args;
-			assertTrue("Argument 1 should be LoaderSignal", (values[0] is LoaderSignal));
-			assertTrue("Argument 2 should be ILoader", (values[1] is ILoader));
-
-			var signal : LoaderSignal = values[0];
-			assertNotNull("LoaderSignal#loader should NOT be null", signal.loader);
+			data;
+			assertTrue("Argument 2 should be ILoader", (event.currentTarget is ILoader));
+			assertNotNull("#loader should NOT be null", event.currentTarget);
 		}
 
 		[Test (async)]
-		override public function onErrorSignalIntended() : void
+		override public function onErrorEventIntended() : void
 		{
 			// Change url to force error signal.
 			_assetloader.getLoader("id-01").request.url = _path + "DOES-NOT-EXIST.file";
-
-			handleSignal(this, _assetloader.onError, onErrorIntended_handler);
-
+			_assetloader.addEventListener(AssetLoaderErrorEvent.ERROR, Async.asyncHandler(this, onErrorIntended_handler, 500));
 			_loader.start();
 		}
 
-		override protected function onErrorIntended_handler(event : SignalAsyncEvent, data : Object) : void
+		override protected function onErrorIntended_handler(event : AssetLoaderErrorEvent, data : Object) : void
 		{
-			var values : Array = event.args;
-			assertTrue("Argument 1 should be ErrorSignal", (values[0] is ErrorSignal));
-			var signal : ErrorSignal = values[0];
-			assertNotNull("ErrorSignal#loader should NOT be null", signal.loader);
-			assertNotNull("ErrorSignal#type should NOT be null", signal.type);
-			assertNotNull("ErrorSignal#message should NOT be null", signal.message);
+			data;
+			assertNotNull("#loader should NOT be null", event.currentTarget);
+			assertNotNull("#type should NOT be null", event.errorType);
+			assertNotNull("#message should NOT be null", event.message);
 		}
 
 		[Test (async)]
-		public function onChildErrorSignal() : void
+		public function onChildErrorEvent() : void
 		{
-			_assetloader.onChildError.add(onChildErrorSignal_handler);
-			failOnSignal(this, _assetloader.onChildError);
+			_assetloader.addEventListener(AssetLoaderErrorEvent.CHILD_ERROR, Async.asyncHandler(this, onChildErrorEvent_handler, 500, null, onChildErrorEvent_handlerSuccess));
 			_assetloader.start();
 		}
 
-		protected function onChildErrorSignal_handler(signal : ErrorSignal, data : *) : void
+		protected function onChildErrorEvent_handler(event : AssetLoaderErrorEvent, data : *) : void
 		{
-			fail("Error [type: " + signal.type + "] | [message: " + signal.message + "]");
+			data;
+			fail("Error [type: " + event.errorType + "] | [message: " + event.message + "]");
+		}
+
+		protected function onChildErrorEvent_handlerSuccess(event : AssetLoaderErrorEvent) : void
+		{
+			
 		}
 
 		[Test (async)]
-		public function onChildErrorSignalIntended() : void
+		public function onChildErrorEventIntended() : void
 		{
 			// Change url to force error signal.
 			_assetloader.getLoader("id-01").request.url = _path + "DOES-NOT-EXIST.file";
-
-			handleSignal(this, _assetloader.onChildError, onChildErrorSignalIntended_handler);
-
+			_assetloader.addEventListener(AssetLoaderErrorEvent.CHILD_ERROR, Async.asyncHandler(this, onChildErrorEventIntended_handler, 500));
 			_assetloader.start();
 		}
 
-		protected function onChildErrorSignalIntended_handler(event : SignalAsyncEvent, data : Object) : void
+		protected function onChildErrorEventIntended_handler(event : AssetLoaderErrorEvent, data : Object) : void
 		{
-			var values : Array = event.args;
-			assertTrue("Argument 1 should be ErrorSignal", (values[0] is ErrorSignal));
-			assertTrue("Argument 2 should be ILoader", (values[1] is ILoader));
-
-			var signal : ErrorSignal = values[0];
-			assertNotNull("ErrorSignal#loader should NOT be null", signal.loader);
-			assertNotNull("ErrorSignal#type should NOT be null", signal.type);
-			assertNotNull("ErrorSignal#message should NOT be null", signal.message);
+			data;
+			assertTrue("Argument 2 should be ILoader", (event.currentTarget is ILoader));
+			assertNotNull("#loader should NOT be null", event.currentTarget);
+			assertNotNull("#type should NOT be null", event.errorType);
+			assertNotNull("#message should NOT be null", event.message);
 		}
 
 		[Test (async)]
-		override public function onHttpStatusSignal() : void
+		override public function onHttpStatusEvent() : void
 		{
-			failOnSignal(this, _loader.onHttpStatus);
+			_loader.addEventListener(AssetLoaderHTTPStatusEvent.STATUS, Async.asyncHandler(this, onHttpStatusEventFailed, 500, null, onHttpStatusEventSuccess));
 			_loader.start();
 		}
 
+		private function onHttpStatusEventSuccess(event:AssetLoaderHTTPStatusEvent):void {
+			
+		}
+
+		private function onHttpStatusEventFailed(event:AssetLoaderHTTPStatusEvent, data:Object):void {
+			data;
+			fail("http status event should not be called");
+		}
+
 		[Test (async)]
-		public function onConfigLoadedSignal() : void
+		public function onConfigLoadedEvent() : void
 		{
-			handleSignal(this, _assetloader.onConfigLoaded, onConfigLoadedSignal_handler);
+			_assetloader.addEventListener(AssetLoaderEvent.CONFIG_LOADED, Async.asyncHandler(this, onConfigLoadedEvent_handler, 500));
 			_assetloader.addConfig(_path + "testXML.xml");
 		}
 
-		protected function onConfigLoadedSignal_handler(event : SignalAsyncEvent, data : Object) : void
+		protected function onConfigLoadedEvent_handler(event : AssetLoaderEvent, data : Object) : void
 		{
-			var values : Array = event.args;
-			assertTrue("Argument 1 should be LoaderSignal", (values[0] is LoaderSignal));
-
-			var signal : LoaderSignal = values[0];
-			assertNotNull("LoaderSignal#loader should NOT be null", signal.loader);
+			data;
+			assertNotNull("#loader should NOT be null", event.currentTarget);
+			assertNotNull("#loader should NOT be null", IAssetLoader(event.currentTarget).config);
+			assertTrue("#loader should NOT be null", IAssetLoader(event.currentTarget).config is XML);
 		}
 	}
 }

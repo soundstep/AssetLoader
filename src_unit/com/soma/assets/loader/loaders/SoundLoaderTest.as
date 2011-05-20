@@ -1,13 +1,12 @@
 package com.soma.assets.loader.loaders {
 
+	import com.soma.assets.loader.events.AssetLoaderHTTPStatusEvent;
 	import com.soma.assets.loader.base.AssetType;
+	import com.soma.assets.loader.events.AssetLoaderEvent;
 
-	import org.flexunit.asserts.assertEquals;
 	import org.flexunit.asserts.assertNotNull;
-	import org.flexunit.asserts.assertTrue;
-	import org.osflash.signals.utils.SignalAsyncEvent;
-	import org.osflash.signals.utils.failOnSignal;
-	import org.osflash.signals.utils.handleSignal;
+	import org.flexunit.asserts.fail;
+	import org.flexunit.async.Async;
 
 	import flash.media.Sound;
 	import flash.net.URLRequest;
@@ -36,39 +35,48 @@ package com.soma.assets.loader.loaders {
 		public function onId3Signal() : void
 		{
 			// Make sure that the mp3 loaded has ID3 data, otherwise this test will fail.
-			handleSignal(this, SoundLoader(_loader).onId3, onId3_handler);
+			_loader.addEventListener(AssetLoaderEvent.ID3, Async.asyncHandler(this, onId3_handler, 500));
 			_loader.start();
 		}
 
-		protected function onId3_handler(event : SignalAsyncEvent, data : Object) : void
+		protected function onId3_handler(event:AssetLoaderEvent, data : Object) : void
 		{
-			var values : Array = event.args;
-			assertTrue("Argument 1 should be LoaderSignal", (values[0] is LoaderSignal));
-
-			var signal : LoaderSignal = values[0];
-			assertNotNull("LoaderSignal#loader should NOT be null", signal.loader);
+			data;
+			assertNotNull("#loader should NOT be null", event.currentTarget);
 		}
 
-
-		override protected function assertPostDestroy() : void
-		{
-			super.assertPostDestroy();
-			assertEquals(_loaderName + "#onId3#numListeners should be equal to 0", SoundLoader(_loader).onId3.numListeners, 0);
-		}
 
 		// SOUND LOADER DOES NOT DISPATCH HTTP STATUS SIGNAL
 		[Test (async)]
-		override public function onHttpStatusSignal() : void
+		override public function onHttpStatusEvent() : void
 		{
-			failOnSignal(this, _loader.onHttpStatus);
+			_loader.addEventListener(AssetLoaderHTTPStatusEvent.STATUS, Async.asyncHandler(this, onHttpStatusEventFailed, 500, null, onHttpStatusEventSuccess));
 			_loader.start();
+		}
+
+		private function onHttpStatusEventFailed(event:AssetLoaderHTTPStatusEvent, data:Object):void {
+			data;
+			fail("onHttpStatusEvent should not be called");
+		}
+		
+		private function onHttpStatusEventSuccess(event:AssetLoaderHTTPStatusEvent):void {
+			
 		}
 		
 		[Test (async)]
 		override public function stop() : void
 		{
+			_loader.addEventListener(AssetLoaderEvent.ID3, Async.asyncHandler(this, onStopID3EventFailed, 500, null, onStopID3EventSuccess));
 			super.stop();
-			failOnSignal(this, SoundLoader(_loader).onId3);
+		}
+
+		private function onStopID3EventFailed(event:AssetLoaderEvent, data:Object):void {
+			data;
+			fail("ID3 event should not occur after a stop");
+		}
+
+		private function onStopID3EventSuccess(event:AssetLoaderEvent):void {
+			
 		}
 	}
 }

@@ -154,7 +154,7 @@ package com.soma.assets.loader.loaders {
 					error_handler(errorEvent);
 					break;
 				default:
-					dispatchEvent(new AssetLoaderNetStatusEvent(AssetLoaderNetStatusEvent.STATUS, event.info));
+					dispatchEvent(new AssetLoaderNetStatusEvent(AssetLoaderNetStatusEvent.INFO, event.info));
 					break;
 			}
 		}

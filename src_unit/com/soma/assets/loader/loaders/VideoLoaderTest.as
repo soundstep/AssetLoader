@@ -1,13 +1,13 @@
 package com.soma.assets.loader.loaders {
 
 	import com.soma.assets.loader.base.AssetType;
+	import com.soma.assets.loader.events.AssetLoaderEvent;
+	import com.soma.assets.loader.events.AssetLoaderHTTPStatusEvent;
+	import com.soma.assets.loader.events.AssetLoaderNetStatusEvent;
 
-	import org.flexunit.asserts.assertEquals;
 	import org.flexunit.asserts.assertNotNull;
-	import org.flexunit.asserts.assertTrue;
-	import org.osflash.signals.utils.SignalAsyncEvent;
-	import org.osflash.signals.utils.failOnSignal;
-	import org.osflash.signals.utils.handleSignal;
+	import org.flexunit.asserts.fail;
+	import org.flexunit.async.Async;
 
 	import flash.net.NetStream;
 	import flash.net.URLRequest;
@@ -32,66 +32,74 @@ package com.soma.assets.loader.loaders {
 		}
 
 		// NON - STANDARD - LOADER - TESTS -------------------------------------------------------------------------------------------//
-		[Test]
-		override public function signalsReadyOnConstruction() : void
-		{
-			assertNotNull(_loaderName + "#onNetStatus should NOT be null after construction", VideoLoader(_loader).onNetStatus);
-			assertNotNull(_loaderName + "#onReady should NOT be null after construction", VideoLoader(_loader).onReady);
-		}
 
 		[Test (async)]
-		public function onNetStatusSignal() : void
+		public function onNetStatusEvent() : void
 		{
-			handleSignal(this, VideoLoader(_loader).onNetStatus, onNetStatus_handler);
+			_loader.addEventListener(AssetLoaderNetStatusEvent.INFO, Async.asyncHandler(this, onNetStatus_handler, 500));
 			_loader.start();
 		}
 
-		protected function onNetStatus_handler(event : SignalAsyncEvent, data : Object) : void
+		protected function onNetStatus_handler(event : AssetLoaderNetStatusEvent, data : Object) : void
 		{
-			var values : Array = event.args;
-			assertTrue("Argument 1 should be LoaderSignal", (values[0] is NetStatusSignal));
-
-			var signal : NetStatusSignal = values[0];
-			assertNotNull("NetStatusSignal#loader should NOT be null", signal.loader);
-			assertNotNull("NetStatusSignal#info should NOT be null", signal.info);
+			data;
+			assertNotNull("#loader should NOT be null", event.currentTarget);
+			assertNotNull("#info should NOT be null", event.info);
 		}
 
 		[Test (async)]
-		public function onReadySignal() : void
+		public function onReadyEvent() : void
 		{
-			handleSignal(this, VideoLoader(_loader).onReady, onReady_handler);
+			_loader.addEventListener(AssetLoaderEvent.NET_STREAM_READY, Async.asyncHandler(this, onReady_handler, 500));
 			_loader.start();
 		}
 
-		protected function onReady_handler(event : SignalAsyncEvent, data : Object) : void
+		protected function onReady_handler(event : AssetLoaderEvent, data : Object) : void
 		{
-			var values : Array = event.args;
-			assertTrue("Argument 1 should be LoaderSignal", (values[0] is LoaderSignal));
-
-			var signal : LoaderSignal = values[0];
-			assertNotNull("LoaderSignal#loader should NOT be null", signal.loader);
-		}
-
-		override protected function assertPostDestroy() : void
-		{
-			super.assertPostDestroy();
-			assertEquals(_loaderName + "#onNetStatus#numListeners should be equal to 0", VideoLoader(_loader).onNetStatus.numListeners, 0);
-			assertEquals(_loaderName + "#onReady#numListeners should be equal to 0", VideoLoader(_loader).onReady.numListeners, 0);
+			data;
+			assertNotNull("LoaderSignal#loader should NOT be null", event.currentTarget);
 		}
 
 		// VIDEO LOADER DOES NOT DISPATCH HTTP STATUS SIGNAL
 		[Test (async)]
-		override public function onHttpStatusSignal() : void
+		override public function onHttpStatusEvent() : void
 		{
-			failOnSignal(this, _loader.onHttpStatus);
+			_loader.addEventListener(AssetLoaderHTTPStatusEvent.STATUS, Async.asyncHandler(this, onHttpStatusEventFailed, 500, null, onHttpStatusEventSuccess));
 			_loader.start();
+		}
+
+		private function onHttpStatusEventSuccess(event:AssetLoaderEvent):void {
+		}
+
+		private function onHttpStatusEventFailed(event:AssetLoaderEvent, data:Object):void {
+			data;
+			fail("onHttpStatusEvent should not be called");
 		}
 
 		[Test (async)]
 		override public function stop() : void
 		{
+			_loader.addEventListener(AssetLoaderNetStatusEvent.INFO, Async.asyncHandler(this, onStopNetStatusEventFailed, 500, null, onStopNetStatusEventSuccess));
+			_loader.addEventListener(AssetLoaderEvent.NET_STREAM_READY, Async.asyncHandler(this, onStopReadyEventFailed, 500, null, onStopReadyEventSuccess));
 			super.stop();
-			failOnSignal(this, VideoLoader(_loader).onNetStatus);			failOnSignal(this, VideoLoader(_loader).onReady);
+		}
+		
+		private function onStopNetStatusEventFailed(event:AssetLoaderEvent, data:Object):void {
+			data;
+			fail("net status event should not occur after a stop");
+		}
+
+		private function onStopNetStatusEventSuccess(event:AssetLoaderEvent):void {
+			
+		}
+		
+		private function onStopReadyEventFailed(event:AssetLoaderEvent, data:Object):void {
+			data;
+			fail("net stream ready event should not occur after a stop");
+		}
+
+		private function onStopReadyEventSuccess(event:AssetLoaderEvent):void {
+			
 		}
 	}
 }
