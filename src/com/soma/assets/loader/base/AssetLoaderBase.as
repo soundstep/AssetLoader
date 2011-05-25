@@ -253,6 +253,7 @@ package com.soma.assets.loader.base {
 
 			var bytesLoaded:uint = 0;
 			var bytesTotal:uint = 0;
+			
 
 			for each (var loader : ILoader in _loaders) {
 				bytesLoaded += loader.stats.bytesLoaded;

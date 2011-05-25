@@ -81,7 +81,6 @@ package com.soma.assets.loader.loaders {
 			} catch(error:SecurityError) {
 				dispatchEvent(new AssetLoaderErrorEvent(AssetLoaderErrorEvent.ERROR, error.name, error.message));
 			}
-
 			_progressTimer.start();
 		}
 
@@ -139,24 +138,39 @@ package com.soma.assets.loader.loaders {
 			}
 		}
 
+		private function dispatchNetStatusError(code:String):void {
+			var errorEvent:ErrorEvent = new IOErrorEvent(IOErrorEvent.IO_ERROR);
+			errorEvent.text = code;
+			error_handler(errorEvent);
+		}
+
+
 		/**
 		 * @private
 		 */
 		protected function netStatus_handler(event:NetStatusEvent):void {
-			
 			var code:String = event.info.code;
-			var errorEvent:ErrorEvent;
-
-			switch(code) {
-				case "NetStream.Play.StreamNotFound":
-					errorEvent = new IOErrorEvent(IOErrorEvent.IO_ERROR);
-					errorEvent.text = code;
-					error_handler(errorEvent);
-					break;
-				default:
-					dispatchEvent(new AssetLoaderNetStatusEvent(AssetLoaderNetStatusEvent.INFO, event.info));
-					break;
+			if (
+				code == "NetConnection.Call.BadVersion" || 
+				code == "NetConnection.Call.Failed" || 
+				code == "NetConnection.Call.Prohibited" || 
+				code == "NetConnection.Connect.AppShutdown" || 
+				code == "NetConnection.Connect.Failed" || 
+				code == "NetConnection.Connect.InvalidApp" || 
+				code == "NetConnection.Connect.Rejected" || 
+				code == "NetGroup.Connect.Failed" || 
+				code == "NetGroup.Connect.Rejected" || 
+				code == "NetGroup.Replication.Fetch.Failed" || 
+				code == "NetStream.Connect.Failed" || 
+				code == "NetStream.Connect.Rejected" || 
+				code == "NetStream.Failed" || 
+				code == "NetStream.Play.StreamNotFound" || 
+				code == "NetStream.Play.FileStructureInvalid"
+			) {
+				_progressTimer.stop();
+				dispatchNetStatusError(code);
 			}
+			dispatchEvent(new AssetLoaderNetStatusEvent(AssetLoaderNetStatusEvent.INFO, event.info));
 		}
 
 		/**
