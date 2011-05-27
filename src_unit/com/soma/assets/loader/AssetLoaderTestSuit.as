@@ -13,5 +13,6 @@ package com.soma.assets.loader
 		public var loadersTestSuite : LoadersTestSuite;
 		public var assetLoaderlTest : AssetLoaderTest;
 		public var parsersTestSuite : ParsersTestSuite;
+		public var onDemandeTests : OnDemandTests;
 	}
 }

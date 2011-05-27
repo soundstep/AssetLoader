@@ -71,15 +71,16 @@ package com.soma.assets.loader.parsers {
 			var cL:int = children.length();
 			for (var i:int = 0;i < cL;i++) {
 				var vo:ConfigVO = parseVo(children[i], rootVo);
-
 				if (vo.id != "" && vo.src == "") {
 					var group:IAssetLoader = parseGroup(vo);
 					_assetloader.addLoader(group);
 					group.addConfig(vo.xml);
-				} else if (vo.id != "" && vo.src != "")
+				} else if (vo.id != "" && vo.src != "") {
 					_assetloader.addLoader(parseAsset(vo));
-				else
+				}
+				else {
 					parseXml(children[i], vo);
+				}
 			}
 		}
 
@@ -117,7 +118,7 @@ package com.soma.assets.loader.parsers {
 			child.connections = xml.@connections || inheritFrom.connections;
 			child.retries = xml.@retries || inheritFrom.retries;
 			child.priority = xml.@priority || NaN;
-			child.onDemand = toBoolean(xml.@onDemand, inheritFrom.onDemand);
+			child.onDemand = toBoolean(xml.@onDemand, false);
 			child.preventCache = toBoolean(xml.@preventCache, inheritFrom.preventCache);
 
 			child.transparent = toBoolean(xml.@transparent, inheritFrom.transparent);
