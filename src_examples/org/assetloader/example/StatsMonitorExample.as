@@ -1,18 +1,5 @@
 package org.assetloader.example {
 
-	import com.soma.assets.loader.events.AssetLoaderErrorEvent;
-	import com.soma.assets.loader.events.AssetLoaderEvent;
-	import com.soma.assets.loader.events.AssetLoaderProgressEvent;
-	import com.soma.assets.loader.AssetLoader;
-	import com.soma.assets.loader.base.Param;
-	import com.soma.assets.loader.base.StatsMonitor;
-	import com.soma.assets.loader.core.IAssetLoader;
-	import com.soma.assets.loader.core.ILoadStats;
-	import com.soma.assets.loader.core.ILoader;
-	import com.soma.assets.loader.core.IParam;
-	import com.soma.assets.loader.loaders.SWFLoader;
-	import com.soma.assets.loader.loaders.VideoLoader;
-
 	import flash.display.BlendMode;
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
@@ -22,6 +9,19 @@ package org.assetloader.example {
 	import flash.text.TextField;
 	import flash.text.TextFieldAutoSize;
 	import flash.text.TextFormat;
+	import org.assetloader.AssetLoader;
+	import org.assetloader.base.Param;
+	import org.assetloader.base.StatsMonitor;
+	import org.assetloader.core.IAssetLoader;
+	import org.assetloader.core.ILoadStats;
+	import org.assetloader.core.ILoader;
+	import org.assetloader.core.IParam;
+	import org.assetloader.events.AssetLoaderErrorEvent;
+	import org.assetloader.events.AssetLoaderEvent;
+	import org.assetloader.events.AssetLoaderProgressEvent;
+	import org.assetloader.loaders.SWFLoader;
+	import org.assetloader.loaders.VideoLoader;
+
 
 	/**
 	 * @author Matan Uberstein

@@ -9,7 +9,7 @@
 	
 	<fx:Script>
 		<![CDATA[
-			import com.soma.assets.loader.AssetLoaderTestSuit;
+			import org.assetloader.AssetLoaderTestSuit;
 			import org.flexunit.listeners.CIListener;
 			import org.flexunit.listeners.UIListener;
 			import org.flexunit.runner.FlexUnitCore;

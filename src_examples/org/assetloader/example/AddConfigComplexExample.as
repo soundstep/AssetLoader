@@ -1,17 +1,17 @@
 package org.assetloader.example {
 
-	import com.soma.assets.loader.AssetLoader;
-	import com.soma.assets.loader.core.IAssetLoader;
-	import com.soma.assets.loader.core.ILoadStats;
-	import com.soma.assets.loader.events.AssetLoaderErrorEvent;
-	import com.soma.assets.loader.events.AssetLoaderEvent;
-
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
 	import flash.events.Event;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
+	import org.assetloader.AssetLoader;
+	import org.assetloader.core.IAssetLoader;
+	import org.assetloader.core.ILoadStats;
+	import org.assetloader.events.AssetLoaderErrorEvent;
+	import org.assetloader.events.AssetLoaderEvent;
+
 
 	/**
 	 * @author Matan Uberstein
