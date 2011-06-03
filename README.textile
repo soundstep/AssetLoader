@@ -1,31 +1,31 @@
 h2. AssetLoader
 
-Multi file/asset loader for AS3 built on AS3Signals.
+Multi file/asset loader for AS3 built event-based.
 
 h3. Overview
 
-AssetLoader provides an easy way to load multiple files. Assetloader does not use events; instead it uses "AS3Signals":http://github.com/robertpenner/as3-signals.
+AssetLoader provides an easy way to load multiple files.
+
+Note: The "AssetLoader":https://github.com/soundstep/AssetLoader library is a port based on Flash built-in events from the original "Matan's AssetLoader":https://github.com/Matan/AssetLoader that is written with signals.
 
 h3. Some Features
 
-Please check out the "wiki section":http://github.com/Matan/AssetLoader/wiki for more information and examples.
+Please check out the "wiki section":https://github.com/soundstep/AssetLoader/wiki for more information and examples.
 
 * Automatic Type detection.
 * Multiple connections, which you can define = faster loading = less waiting = happier users.
-* **No Events, AS3Signals only.**
 * No singletons! Construct as many AssetLoaders as you want!
-* Data is dispatched with strong types. NO CASTING!
 * Endless recursive group loaders within loaders, within loaders, etc.
 * Pause/Resume/Destroy capabilities.
 * Dynamic parameter system that works with code completion - No guessing!
-* Loader parameters smartly inherit from their parent loaders, which mean you write less code.
+* Loader parameters smartly inherit from their parent loaders (except on demand parameter), which mean you write less code.
 * Real-time loading stats. This provides latency, speed, average and progress of all downloads.
 * Consolidated stats, loaders reclusively consolidate loading stats all the way down to the last child.
 * Can be configured via XML, straight up or from an external file with one easy call.
-* All loader errors are consolidated to one signal. IOError, SecurityError, etc. - you don't have to worry about it, they all boil down to one place. Which means you can "globally" handle loading errors with one listener/command.
+* All loader errors are consolidated to one event. IOError, SecurityError, etc. - you don't have to worry about it, they all boil down to one place. Which means you can "globally" handle loading errors with one listener/command.
 * Interfaces all round.
 * Unit tested! :D
-* Works super well with "Robotlegs":http://www.robotlegs.org! //what doesn’t :P
+* Implemented in the "SomaAssets plugin":https://github.com/soundstep/somacore_plugins for the "SomaCore framework":https://github.com/soundstep/somacore_framework
 * And some other stuff too!
 
 h2. License
