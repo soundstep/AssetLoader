@@ -1,8 +1,9 @@
-package org.assetloader.example
-{
+package org.assetloader.example {
+
+	import org.assetloader.events.AssetLoaderEvent;
+	import org.assetloader.events.AssetLoaderLogEvent;
 	import org.assetloader.AssetLoader;
 	import org.assetloader.core.IAssetLoader;
-	import org.assetloader.signals.LoaderSignal;
 	import org.assetloader.utils.ALLogger;
 
 	import flash.display.Sprite;
@@ -39,13 +40,24 @@ package org.assetloader.example
 			initConsole();
 
 			_assetloader = new AssetLoader("pr-group");
+			_assetloader.addEventListener(AssetLoaderEvent.COMPLETE, completeHandler);
 
 			// AssetLoader Logger, will output trace statements.
 			_logger = new ALLogger();
-			_logger.onLog.add(append);
+			_logger.addEventListener(AssetLoaderLogEvent.LOG, logHandler);
 
 			// Sample swapping out of indent char.
 			_logger.indentChar = "--> ";
+		}
+
+		private function completeHandler(event:AssetLoaderEvent):void {
+			append("//------------------------------------------------------------------------------//");
+			append("INFO: Loading complete");
+			append("//------------------------------------------------------------------------------//");
+		}
+
+		private function logHandler(event:AssetLoaderLogEvent):void {
+			append(event.log);
 		}
 
 		// --------------------------------------------------------------------------------------------------------------------------------//
@@ -56,7 +68,7 @@ package org.assetloader.example
 			append("//------------------------------------------------------------------------------//");
 			append("USER COMMAND: Load Config");
 
-			_assetloader.onConfigLoaded.addOnce(onConfigLoaded_handler);
+			_assetloader.addEventListener(AssetLoaderEvent.CONFIG_LOADED, onConfigLoaded_handler);
 			_assetloader.addConfig("complex-queue-config.xml");
 		}
 
@@ -118,7 +130,7 @@ package org.assetloader.example
 			_field.text = "";
 		}
 
-		protected function onConfigLoaded_handler(signal : LoaderSignal) : void
+		protected function onConfigLoaded_handler(event:AssetLoaderEvent) : void
 		{
 			append("... Config Loaded");
 			append("//------------------------------------------------------------------------------//");

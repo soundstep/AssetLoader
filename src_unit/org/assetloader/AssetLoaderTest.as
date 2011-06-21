@@ -197,6 +197,8 @@ package org.assetloader {
 			// Change url to force error event.
 			_assetloader.getLoader("id-01").request.url = _path + "DOES-NOT-EXIST.file";
 			
+			_assetloader.failOnError = false;
+			
 			// onComplete must dispatch regardless of child error
 			_loader.addEventListener(AssetLoaderEvent.COMPLETE, Async.asyncHandler(this, onComplete_handler, 500));
 			_loader.start();

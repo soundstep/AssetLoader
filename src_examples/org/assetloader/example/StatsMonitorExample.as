@@ -1,5 +1,6 @@
 package org.assetloader.example {
 
+	import flash.text.TextFormat;
 	import flash.display.BlendMode;
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
@@ -138,9 +139,9 @@ package org.assetloader.example {
 		// --------------------------------------------------------------------------------------------------------------------------------//
 		protected function monitor_onProgress_handler(event:AssetLoaderProgressEvent) : void
 		{
-			_progressBar.width = (signal.progress * stage.stageWidth) / 100;
+			_progressBar.width = (event.progress * stage.stageWidth) / 100;
 			
-			_progressField.text = Math.ceil(signal.progress) + "% | " + Math.ceil(signal.bytesLoaded / 1024 /1024) + " mb of " + Math.ceil(signal.bytesTotal / 1024 /1024) + " mb";
+			_progressField.text = Math.ceil(event.progress) + "% | " + Math.ceil(event.bytesLoaded / 1024 /1024) + " mb of " + Math.ceil(event.bytesTotal / 1024 /1024) + " mb";
 		}
 
 		protected function monitor_onComplete_handler(event:AssetLoaderEvent) : void
@@ -161,11 +162,11 @@ package org.assetloader.example {
 				group.addEventListener(AssetLoaderEvent.CHILD_COMPLETE, onChildComplete_handler);
 			}
 			else
-				loader.onOpen.add(onOpen_handler);
+				loader.addEventListener(AssetLoaderEvent.OPEN, onOpen_handler);
 
-			loader.onOpen.add(onOpen_handler);
-			loader.onComplete.add(onComplete_handler);
-			loader.onError.add(onError_handler);
+			loader.addEventListener(AssetLoaderEvent.OPEN, onOpen_handler);
+			loader.addEventListener(AssetLoaderEvent.COMPLETE, onComplete_handler);
+			loader.addEventListener(AssetLoaderErrorEvent.ERROR, onError_handler);
 		}
 
 		protected function removeListenersFromLoader(loader : ILoader) : void
@@ -178,9 +179,9 @@ package org.assetloader.example {
 				group.removeEventListener(AssetLoaderEvent.CHILD_COMPLETE, onChildComplete_handler);
 			}
 
-			loader.onOpen.remove(onOpen_handler);
-			loader.onComplete.remove(onComplete_handler);
-			loader.onError.remove(onError_handler);
+			loader.removeEventListener(AssetLoaderEvent.OPEN, onOpen_handler);
+			loader.removeEventListener(AssetLoaderEvent.COMPLETE, onComplete_handler);
+			loader.removeEventListener(AssetLoaderErrorEvent.ERROR, onError_handler);
 		}
 
 		// --------------------------------------------------------------------------------------------------------------------------------//

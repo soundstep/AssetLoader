@@ -138,39 +138,50 @@ package org.assetloader.loaders {
 			}
 		}
 
-		private function dispatchNetStatusError(code:String):void {
-			var errorEvent:ErrorEvent = new IOErrorEvent(IOErrorEvent.IO_ERROR);
-			errorEvent.text = code;
-			error_handler(errorEvent);
-		}
-
-
 		/**
 		 * @private
 		 */
-		protected function netStatus_handler(event:NetStatusEvent):void {
-			var code:String = event.info.code;
-			if (
-				code == "NetConnection.Call.BadVersion" || 
-				code == "NetConnection.Call.Failed" || 
-				code == "NetConnection.Call.Prohibited" || 
-				code == "NetConnection.Connect.AppShutdown" || 
-				code == "NetConnection.Connect.Failed" || 
-				code == "NetConnection.Connect.InvalidApp" || 
-				code == "NetConnection.Connect.Rejected" || 
-				code == "NetGroup.Connect.Failed" || 
-				code == "NetGroup.Connect.Rejected" || 
-				code == "NetGroup.Replication.Fetch.Failed" || 
-				code == "NetStream.Connect.Failed" || 
-				code == "NetStream.Connect.Rejected" || 
-				code == "NetStream.Failed" || 
-				code == "NetStream.Play.StreamNotFound" || 
-				code == "NetStream.Play.FileStructureInvalid"
-			) {
-				_progressTimer.stop();
-				dispatchNetStatusError(code);
+		protected function netStatus_handler(event : NetStatusEvent) : void
+		{
+			var code : String = event.info.code;
+
+			var errorEvent : ErrorEvent;
+
+			switch(code)
+			{
+				case "NetConnection.Call.BadVersion" :
+				case "NetConnection.Call.Failed" :
+				case "NetConnection.Call.Prohibited" :
+				case "NetConnection.Connect.AppShutdown" :
+				case "NetConnection.Connect.Failed" :
+				case "NetConnection.Connect.InvalidApp" :
+				case "NetConnection.Connect.Rejected" :
+				case "NetGroup.Connect.Failed" :
+				case "NetGroup.Connect.Rejected" :
+				case "NetGroup.Replication.Fetch.Failed" :
+				case "NetStream.Connect.Failed" :
+				case "NetStream.Connect.Rejected" :
+				case "NetStream.Failed" :
+				case "NetStream.Play.FileStructureInvalid" :
+					
+					errorEvent = new ErrorEvent(ErrorEvent.ERROR);
+					errorEvent.text = code;
+					error_handler(errorEvent);
+					
+					break;
+
+				case "NetStream.Play.StreamNotFound":
+
+					errorEvent = new IOErrorEvent(IOErrorEvent.IO_ERROR);
+					errorEvent.text = code;
+					error_handler(errorEvent);
+
+					break;
+
+				default:
+					dispatchEvent(new AssetLoaderNetStatusEvent(AssetLoaderNetStatusEvent.INFO, event.info));
+					break;
 			}
-			dispatchEvent(new AssetLoaderNetStatusEvent(AssetLoaderNetStatusEvent.INFO, event.info));
 		}
 
 		/**

@@ -40,7 +40,7 @@ package org.assetloader {
 		/**
 		 * @private
 		 */
-		protected var _failOnError : Boolean;
+		protected var _failOnError : Boolean = true;
 
 		public function AssetLoader(id : String = "PrimaryGroup")
 		{

@@ -95,11 +95,13 @@ package org.assetloader.loaders {
 		 * @private
 		 */
 		protected function error_handler(event:ErrorEvent):void {
-			_inProgress = false;
 			if (_retryTally < getParam(Param.RETRIES) - 1) {
 				_retryTally++;
 				start();
-			} else {
+			}
+			else
+			{
+				_inProgress = false;
 				_failed = true;
 				removeListeners(_eventDispatcher);
 				dispatchEvent(new AssetLoaderErrorEvent(AssetLoaderErrorEvent.ERROR, event.type, event.text));
@@ -156,6 +158,7 @@ package org.assetloader.loaders {
 			removeListeners(_eventDispatcher);
 
 			_inProgress = false;
+			_failed = false;
 			_loaded = true;
 			dispatchEvent(new AssetLoaderEvent(AssetLoaderEvent.COMPLETE, null, null, _data));
 		}
