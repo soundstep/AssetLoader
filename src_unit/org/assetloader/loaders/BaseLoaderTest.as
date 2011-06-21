@@ -115,6 +115,7 @@ package org.assetloader.loaders {
 		public function booleanStateAfterError() : void
 		{
 			// Change url to force error signal.
+			
 			_loader.request.url = _path + "DOES-NOT-EXIST.file";
 			_loader.addEventListener(AssetLoaderErrorEvent.ERROR, Async.asyncHandler(this, onError_booleanStateAfterError_handler, 500));
 			_loader.start();

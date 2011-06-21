@@ -190,5 +190,48 @@ package org.assetloader {
 			assertNotNull("#loader should NOT be null", IAssetLoader(event.currentTarget).config);
 			assertTrue("#loader should NOT be null", IAssetLoader(event.currentTarget).config is XML);
 		}
+		
+		[Test (async)]
+		public function onCompleteEventWithError() : void
+		{
+			// Change url to force error event.
+			_assetloader.getLoader("id-01").request.url = _path + "DOES-NOT-EXIST.file";
+			
+			// onComplete must dispatch regardless of child error
+			_loader.addEventListener(AssetLoaderEvent.COMPLETE, Async.asyncHandler(this, onComplete_handler, 500));
+			_loader.start();
+		}
+
+		protected function onCompleteWithError_handler(event : AssetLoaderEvent, data : Object) : void
+		{
+			super.onComplete_handler(event, data);
+			assertEquals(_loaderName + "#loaded state after loading complete with error", true, _loader.loaded);
+			assertEquals(_loaderName + "#failed state after loading complete with error", true, _loader.failed);
+		}
+		
+		[Test (async)]
+		public function onCompleteSignalWithErrorAndFailOnErrorSetToTrue() : void
+		{
+			// Change url to force error signal.
+			_assetloader.getLoader("id-01").request.url = _path + "DOES-NOT-EXIST.file";
+			
+			_assetloader.failOnError = true;
+			
+			// onComplete must NOT dispatch, because flag is set to true.
+			_loader.addEventListener(AssetLoaderEvent.COMPLETE, Async.asyncHandler(this, onCompleteSignalWithErrorAndFailOnErrorSetToTrueFailed, 500, null, onCompleteSignalWithErrorAndFailOnErrorSetToTrueSuccess));
+			_loader.start();
+		}
+		
+		protected function onCompleteSignalWithErrorAndFailOnErrorSetToTrueFailed(event : AssetLoaderEvent, data : Object) : void
+		{
+			data;
+			fail("FAIL onCompleteSignalWithErrorAndFailOnErrorSetToTrue complete dispatched");
+		}
+		
+		protected function onCompleteSignalWithErrorAndFailOnErrorSetToTrueSuccess(event : AssetLoaderEvent) : void
+		{
+			assertEquals(_loaderName + "#loaded state after loading complete with error", false, _loader.loaded);
+			assertEquals(_loaderName + "#failed state after loading complete with error", true, _loader.failed);
+		}
 	}
 }

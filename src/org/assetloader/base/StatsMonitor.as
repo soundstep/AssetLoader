@@ -12,14 +12,31 @@ package org.assetloader.base {
 	 * 
 	 * Consolidates multiple ILoader's stats.
 	 */
-	public class StatsMonitor extends EventDispatcher {
+	public class StatsMonitor extends EventDispatcher
+	{
+		/**
+		 * @private
+		 */
+		protected var _loaders : Array;
+		/**
+		 * @private
+		 */
+		protected var _stats : ILoadStats;
+		/**
+		 * @private
+		 */
+		protected var _numLoaders : int;
+		/**
+		 * @private
+		 */
+		protected var _numComplete : int;
+		/**
+		 * @private
+		 */
+		protected var _ids : Array = [];
 
-		protected var _loaders:Array;
-		protected var _stats:ILoadStats;
-		protected var _numLoaders:int;
-		protected var _numComplete:int;
-
-		public function StatsMonitor() {
+		public function StatsMonitor()
+		{
 			_loaders = [];
 			_stats = new LoaderStats();
 		}
@@ -31,13 +48,17 @@ package org.assetloader.base {
 		 * 
 		 * @throws org.assetloader.base.AssetLoaderError ALREADY_CONTAINS_LOADER
 		 */
-		public function add(loader:ILoader):void {
-			if (_loaders.indexOf(loader) == -1) {
+		public function add(loader : ILoader) : void
+		{
+			if(_loaders.indexOf(loader) == -1)
+			{
 				addListener(loader);
 
 				_loaders.push(loader);
+				_ids.push(loader.id);
 				_numLoaders = _loaders.length;
-			} else
+			}
+			else
 				throw new AssetLoaderError(AssetLoaderError.ALREADY_CONTAINS_LOADER);
 		}
 
@@ -48,15 +69,18 @@ package org.assetloader.base {
 		 * 
 		 * @throws org.assetloader.base.AssetLoaderError DOESNT_CONTAIN_LOADER
 		 */
-		public function remove(loader:ILoader):void {
-			var index:int = _loaders.indexOf(loader);
-			if (index != -1) {
+		public function remove(loader : ILoader) : void
+		{
+			var index : int = _loaders.indexOf(loader);
+			if(index != -1)
+			{
 				removeListener(loader);
 
 				if (loader.loaded)
 					_numComplete--;
 
 				_loaders.splice(index, 1);
+				_ids.splice(index, 1);
 				_numLoaders = _loaders.length;
 			} else
 				throw new AssetLoaderError(AssetLoaderError.DOESNT_CONTAIN_LOADER);
@@ -68,8 +92,10 @@ package org.assetloader.base {
 		 * <p>Note: After calling destroy, this instance of StatsMonitor is still usable.
 		 * Simply rebuild your monitor list via the add() method.</p>
 		 */
-		public function destroy():void {
-			for each (var loader : ILoader in _loaders) {
+		public function destroy() : void
+		{
+			for each(var loader : ILoader in _loaders)
+			{
 				removeListener(loader);
 			}
 
@@ -91,7 +117,8 @@ package org.assetloader.base {
 		/**
 		 * @private
 		 */
-		protected function removeListener(loader:ILoader):void {
+		protected function removeListener(loader : ILoader) : void
+		{
 			loader.removeEventListener(AssetLoaderEvent.START, start_handler);
 			loader.removeEventListener(AssetLoaderEvent.OPEN, open_handler);
 			loader.removeEventListener(AssetLoaderProgressEvent.PROGRESS, progress_handler);
@@ -101,7 +128,8 @@ package org.assetloader.base {
 		/**
 		 * @private
 		 */
-		protected function start_handler(event:AssetLoaderEvent):void {
+		protected function start_handler(event:AssetLoaderEvent):void
+		{
 			for each (var loader : ILoader in _loaders) {
 				loader.removeEventListener(AssetLoaderEvent.START, start_handler);
 			}
@@ -146,6 +174,42 @@ package org.assetloader.base {
 				_stats.done();
 				dispatchEvent(new AssetLoaderEvent(AssetLoaderEvent.COMPLETE, null, null, null, null, _stats));
 			}
+		}
+
+		/**
+		 * Checks whether the StatsMonitor contains an ILoader with id passed.
+		 * 
+		 * @param id Id for the ILoader.
+		 * 
+		 * @return Boolean
+		 */
+		public function hasLoader(id : String) : Boolean
+		{
+			return (_ids.indexOf(id) != -1);
+		}
+
+		/**
+		 * Gets the load with id passed.
+		 * 
+		 * @param id Id for the ILoader.
+		 * 
+		 * @return ILoader.
+		 */
+		public function getLoader(id : String) : ILoader
+		{
+			if(hasLoader(id))
+				return _loaders[_ids.indexOf(id)];
+			return null;
+		}
+
+		/**
+		 * All the ids of the ILoaders added to this StatsMonitor.
+		 * 
+		 * @return Array of Strings
+		 */
+		public function get ids() : Array
+		{
+			return _ids;
 		}
 
 		/**

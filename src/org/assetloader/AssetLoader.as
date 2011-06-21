@@ -20,16 +20,33 @@ package org.assetloader {
 		/**
 		 * @private
 		 */
+		private var _config:XML;
+		/**
+		 * @private
+		 */
 		protected var _loadedIds:Array;
 		/**
 		 * @private
 		 */
 		protected var _numLoaded:int;
-		private var _config:XML;
+		/**
+		 * @private
+		 */
+		protected var _failedIds : Array;
+		/**
+		 * @private
+		 */
+		protected var _numFailed : int;
+		/**
+		 * @private
+		 */
+		protected var _failOnError : Boolean;
 
-		public function AssetLoader(id:String = "PrimaryGroup") {
+		public function AssetLoader(id : String = "PrimaryGroup")
+		{
 			super(id);
 			_loadedIds = [];
+			_failedIds = [];
 		}
 
 		/**
@@ -67,8 +84,11 @@ package org.assetloader {
 			if (loader) {
 				if (loader.loaded)
 					_loadedIds.splice(_loadedIds.indexOf(id), 1);
-
 				_numLoaded = _loadedIds.length;
+
+				if(loader.failed)
+					_failedIds.splice(_failedIds.indexOf(id), 1);
+				_numFailed = _failedIds.length;
 			}
 
 			return loader;
@@ -88,8 +108,9 @@ package org.assetloader {
 				numConnections = _numLoaders;
 
 			super.start();
-
-			for (var k:int = 0;k < numConnections;k++) {
+			
+			for(var k : int = 0;k < numConnections;k++)
+			{
 				startNextLoader();
 			}
 		}
@@ -135,6 +156,38 @@ package org.assetloader {
 			return _numLoaded;
 		}
 
+		/**
+		 * @inheritDoc
+		 */
+		public function get failedIds() : Array
+		{
+			return _failedIds;
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		public function get numFailed() : int
+		{
+			return _numFailed;
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		public function get failOnError() : Boolean
+		{
+			return _failOnError;
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		public function set failOnError(value : Boolean) : void
+		{
+			_failOnError = value;
+		}
+
 		// --------------------------------------------------------------------------------------------------------------------------------//
 		// PROTECTED FUNCTIONS
 		// --------------------------------------------------------------------------------------------------------------------------------//
@@ -176,6 +229,18 @@ package org.assetloader {
 			}
 		}
 
+		/**
+		 * @private
+		 */
+		protected function checkForComplete(event:AssetLoaderEvent) : void
+		{
+			var sum : int = _failOnError ? _numLoaded : _numLoaded + _numFailed;
+			if(sum == _numLoaders)
+				super.complete_handler(event, _assets);
+			else
+				startNextLoader();
+		}
+
 		// --------------------------------------------------------------------------------------------------------------------------------//
 		// PROTECTED HANDLERS
 		// --------------------------------------------------------------------------------------------------------------------------------//
@@ -192,9 +257,19 @@ package org.assetloader {
 		 * @private
 		 */
 		override protected function error_handler(event:AssetLoaderErrorEvent):void {
-			dispatchEvent(new AssetLoaderErrorEvent(AssetLoaderErrorEvent.CHILD_ERROR, event.errorType, event.message, ILoader(event.currentTarget)));
+			
+			var loader:ILoader = event.currentTarget as ILoader;
+			
+			_failedIds.push(loader.id);
+			_numFailed = _failedIds.length;
+			
+			dispatchEvent(new AssetLoaderErrorEvent(AssetLoaderErrorEvent.CHILD_ERROR, event.errorType, event.message, loader));
 			super.error_handler(event);
-			startNextLoader();
+			
+			if (!_failOnError) {
+				checkForComplete(null);
+			}
+			
 		}
 
 		/**
@@ -211,10 +286,7 @@ package org.assetloader {
 
 			dispatchEvent(new AssetLoaderEvent(AssetLoaderEvent.CHILD_COMPLETE, null, ILoader(event.currentTarget)));
 
-			if (_numLoaded == _numLoaders)
-				super.complete_handler(event, _assets);
-			else
-				startNextLoader();
+			checkForComplete(null);
 		}
 
 		/**

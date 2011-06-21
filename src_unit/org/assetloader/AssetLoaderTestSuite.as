@@ -7,12 +7,11 @@ package org.assetloader
 
 	[Suite]
 	[RunWith("org.flexunit.runners.Suite")]
-	public class AssetLoaderTestSuit
+	public class AssetLoaderTestSuite
 	{
 		public var baseTestSuite : BaseTestSuite;
 		public var loadersTestSuite : LoadersTestSuite;
 		public var assetLoaderlTest : AssetLoaderTest;
 		public var parsersTestSuite : ParsersTestSuite;
-		public var onDemandeTests : OnDemandTests;
 	}
 }
