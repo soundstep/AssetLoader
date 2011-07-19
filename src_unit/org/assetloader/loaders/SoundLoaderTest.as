@@ -1,13 +1,15 @@
 package org.assetloader.loaders {
 
-	import flash.media.Sound;
-	import flash.net.URLRequest;
 	import org.assetloader.base.AssetType;
 	import org.assetloader.events.AssetLoaderEvent;
 	import org.assetloader.events.AssetLoaderHTTPStatusEvent;
 	import org.flexunit.asserts.assertNotNull;
+	import org.flexunit.asserts.assertTrue;
 	import org.flexunit.asserts.fail;
 	import org.flexunit.async.Async;
+
+	import flash.media.Sound;
+	import flash.net.URLRequest;
 
 
 
@@ -32,7 +34,7 @@ package org.assetloader.loaders {
 		// NON - STANDARD - LOADER - TESTS -------------------------------------------------------------------------------------------//
 
 		[Test (async)]
-		public function onId3Signal() : void
+		public function onId3Event() : void
 		{
 			// Make sure that the mp3 loaded has ID3 data, otherwise this test will fail.
 			_loader.addEventListener(AssetLoaderEvent.ID3, Async.asyncHandler(this, onId3_handler, 500));
@@ -45,6 +47,20 @@ package org.assetloader.loaders {
 			assertNotNull("#loader should NOT be null", event.currentTarget);
 		}
 
+		[Test (async)]
+		public function onReadyEvent() : void
+		{
+			_loader.addEventListener(AssetLoaderEvent.SOUND_READY, Async.asyncHandler(this, onReady_handler, 500));
+			_loader.start();
+		}
+
+		protected function onReady_handler(event : AssetLoaderEvent, data : Object) : void
+		{
+			data;
+			assertNotNull("loader should NOT be null", event.currentTarget);
+			assertNotNull("sound in SoundLoader", event.currentTarget.data);
+			assertTrue(event.currentTarget.data is Sound);
+		}
 
 		// SOUND LOADER DOES NOT DISPATCH HTTP STATUS SIGNAL
 		[Test (async)]

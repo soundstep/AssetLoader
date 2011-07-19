@@ -1,14 +1,15 @@
 package org.assetloader.loaders {
 
+	import org.assetloader.events.AssetLoaderEvent;
+	import org.assetloader.events.AssetLoaderErrorEvent;
+	import org.assetloader.base.Param;
+	import flash.utils.Timer;
+	import org.assetloader.base.AssetType;
 	import flash.events.Event;
 	import flash.events.IEventDispatcher;
+	import flash.events.TimerEvent;
 	import flash.media.Sound;
 	import flash.net.URLRequest;
-	import org.assetloader.base.AssetType;
-	import org.assetloader.base.Param;
-	import org.assetloader.events.AssetLoaderErrorEvent;
-	import org.assetloader.events.AssetLoaderEvent;
-
 
 	/**
 	 * @author Matan Uberstein
@@ -19,16 +20,30 @@ package org.assetloader.loaders {
 		 * @private
 		 */
 		protected var _sound:Sound;
-
-		public function SoundLoader(request:URLRequest, id:String = null) {
+		/**
+		 * @private
+		 */
+		protected var _readyTimer : Timer;
+		/**
+		 * @private
+		 */
+		protected var _hasDispatchedReady : Boolean;
+		
+		public function SoundLoader(request : URLRequest, id : String = null)
+		{
 			super(request, AssetType.SOUND, id);
 		}
 
 		/**
 		 * @private
 		 */
-		override protected function constructLoader():IEventDispatcher {
+		override protected function constructLoader() : IEventDispatcher
+		{
 			_sound = _data = new Sound();
+
+			_readyTimer = new Timer(50);
+			_readyTimer.addEventListener(TimerEvent.TIMER, readyTimer_handler);
+
 			return _sound;
 		}
 
@@ -41,6 +56,7 @@ package org.assetloader.loaders {
 			} catch(error:SecurityError) {
 				dispatchEvent(new AssetLoaderErrorEvent(AssetLoaderErrorEvent.ERROR, error.name, error.message));
 			}
+			_readyTimer.start();
 		}
 
 		/**
@@ -52,6 +68,7 @@ package org.assetloader.loaders {
 					_sound.close();
 				} catch(error:Error) {
 				}
+				_readyTimer.stop();
 			}
 			super.stop();
 		}
@@ -61,7 +78,12 @@ package org.assetloader.loaders {
 		 */
 		override public function destroy():void {
 			super.destroy();
+
+			if(_readyTimer)
+				_readyTimer.removeEventListener(TimerEvent.TIMER, readyTimer_handler);
+
 			_sound = null;
+			_readyTimer = null;
 		}
 
 		/**
@@ -82,10 +104,34 @@ package org.assetloader.loaders {
 				dispatcher.removeEventListener(Event.ID3, id3_handler);
 		}
 
+				/**
+		 * @private
+		 */
+		override protected function complete_handler(event : Event) : void
+		{
+			readyTimer_handler();
+			super.complete_handler(event);
+		}
+
 		/**
 		 * @private
 		 */
-		protected function id3_handler(event:Event):void {
+		protected function readyTimer_handler(event : TimerEvent = null) : void
+		{
+			if(!_hasDispatchedReady && !_sound.isBuffering)
+			{
+				dispatchEvent(new AssetLoaderEvent(AssetLoaderEvent.SOUND_READY, parent, null, _sound));
+				_hasDispatchedReady = true;
+
+				_readyTimer.stop();
+			}
+		}
+
+		/**
+		 * @private
+		 */
+		protected function id3_handler(event : Event) : void
+		{
 			dispatchEvent(new AssetLoaderEvent(AssetLoaderEvent.ID3));
 		}
 
@@ -96,7 +142,8 @@ package org.assetloader.loaders {
 		 * 
 		 * @return Sound
 		 */
-		public function get sound():Sound {
+		public function get sound() : Sound
+		{
 			return _sound;
 		}
 	}

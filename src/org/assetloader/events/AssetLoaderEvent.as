@@ -22,6 +22,8 @@ package org.assetloader.events {
 		public static const REMOVED_FROM_PARENT:String = "AssetLoaderEvent.REMOVED_FROM_PARENT";
 		public static const ID3:String = "AssetLoaderEvent.ID3";
 		public static const NET_STREAM_READY:String = "AssetLoaderEvent.NET_STREAM_READY";
+		public static const SOUND_READY:String = "AssetLoaderEvent.SOUND_READY";
+		
 		public var parent:ILoader;
 		public var child:ILoader;
 		public var data:*;
