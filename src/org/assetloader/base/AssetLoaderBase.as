@@ -45,11 +45,35 @@ package org.assetloader.base {
 		 */
 		protected var _numConnections:int = 3;
 
+		/**
+		 * @private
+		 */
+		protected var _loadedIds : Array;
+		/**
+		 * @private
+		 */
+		protected var _numLoaded : int;
+
+		/**
+		 * @private
+		 */
+		protected var _failedIds : Array;
+		/**
+		 * @private
+		 */
+		protected var _numFailed : int;
+
+		/**
+		 * @private
+		 */
+		protected var _failOnError : Boolean = true;
 		public function AssetLoaderBase(id:String) {
 			_loaders = new Dictionary(true);
 			_data = _assets = new Dictionary(true);
 			_loaderFactory = new LoaderFactory();
 			_ids = [];
+			_loadedIds = [];
+			_failedIds = [];
 
 			super(id, AssetType.GROUP);
 		}
@@ -83,6 +107,21 @@ package org.assetloader.base {
 			_loaders[loader.id] = loader;
 			_ids.push(loader.id);
 			_numLoaders = _ids.length;
+
+			if(loader.loaded)
+			{
+				_loadedIds.push(loader.id);
+				_numLoaded = _loadedIds.length;
+				_assets[loader.id] = loader.data;
+			}
+			else if(loader.failed)
+			{
+				_failedIds.push(loader.id);
+				_numFailed = _failedIds.length;
+			}
+
+			_failed = (_numFailed > 0);
+			_loaded = (_numLoaders == _numLoaded);
 			if (loader.getParam(Param.PRIORITY) == 0) {
 				loader.setParam(Param.PRIORITY, -(_numLoaders - 1));
 			}
@@ -103,6 +142,14 @@ package org.assetloader.base {
 				_ids.splice(_ids.indexOf(id), 1);
 				delete _loaders[id];
 				delete _assets[id];
+
+				if(loader.loaded)
+					_loadedIds.splice(_loadedIds.indexOf(id), 1);
+				_numLoaded = _loadedIds.length;
+
+				if(loader.failed)
+					_failedIds.splice(_failedIds.indexOf(id), 1);
+				_numFailed = _failedIds.length;
 
 				loader.removeEventListener(AssetLoaderEvent.START, start_handler);
 				removeListeners(loader);
@@ -367,6 +414,55 @@ package org.assetloader.base {
 		public function get numLoaders():int {
 			return _numLoaders;
 		}
+
+		/**
+		 * @inheritDoc
+		 */
+		public function get loadedIds() : Array
+		{
+			return _loadedIds;
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		public function get numLoaded() : int
+		{
+			return _numLoaded;
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		public function get failedIds() : Array
+		{
+			return _failedIds;
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		public function get numFailed() : int
+		{
+			return _numFailed;
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		public function get failOnError() : Boolean
+		{
+			return _failOnError;
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		public function set failOnError(value : Boolean) : void
+		{
+			_failOnError = value;
+		}
+
 		// --------------------------------------------------------------------------------------------------------------------------------//
 		// PUBLIC SIGNALS
 		// --------------------------------------------------------------------------------------------------------------------------------//
